@@ -1,66 +1,62 @@
-const querystring = require('querystring');
-const { google } = require('googleapis');
+const { google } = require("googleapis");
 
-exports.handler = async (event) => {
+exports.handler = async function (event, context) {
   try {
+    console.log("Received event.body:", event.body);
+
+    // Parse URL-encoded form data
+    const parsedData = Object.fromEntries(new URLSearchParams(event.body));
+    console.log("Parsed data:", parsedData);
+
+    // Check for service account credentials
     console.log("GOOGLE_SERVICE_ACCOUNT_CREDENTIALS env:", process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS);
-    
-    const data = querystring.parse(event.body);
+    const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS);
 
-    const {
-      partnerName,
-      partnerDivision,
-      divisionProduct,
-      companyName,
-      decisionMaker,
-      address,
-      decisionMakerEmail,
-      decisionMakerPhone,
-      date,
-      notes,
-    } = data;
-
+    // Authenticate with Google Sheets
     const auth = new google.auth.GoogleAuth({
-      credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS),
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+      credentials,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
 
-    const authClient = await auth.getClient();
+    const sheets = google.sheets({ version: "v4", auth });
 
-    const sheets = google.sheets('v4');
+    const spreadsheetId = "15ut4AnBmHdBliKedUw28VExVaJHX_XFeldETfTqYgTI"; // your Google Sheet ID
+    const range = "Sheet1!A2:K"; // Adjust based on your sheet layout
 
-    const spreadsheetId = process.env.SPREADSHEET_ID;
-    const range = 'Leads!A:J'; // 10 columns
-    const values = [[
-      partnerName,
-      partnerDivision,
-      divisionProduct,
-      companyName,
-      decisionMaker,
-      address,
-      decisionMakerEmail,
-      decisionMakerPhone,
-      date,
-      notes,
-    ]];
+    const values = [
+      [
+        parsedData.partnerName,
+        parsedData.partnerDivision,
+        parsedData.divisionProduct,
+        parsedData.companyName,
+        parsedData.decisionMaker,
+        parsedData.address,
+        parsedData.decisionMakerEmail,
+        parsedData.decisionMakerPhone,
+        parsedData.date,
+        parsedData.notes,
+        new Date().toISOString(),
+      ],
+    ];
 
     await sheets.spreadsheets.values.append({
-      auth: authClient,
       spreadsheetId,
       range,
-      valueInputOption: 'RAW',
-      requestBody: { values },
+      valueInputOption: "RAW",
+      requestBody: {
+        values,
+      },
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Lead submitted successfully' }),
+      body: JSON.stringify({ message: "Lead submitted successfully" }),
     };
   } catch (error) {
-    console.error(error);
+    console.error("Error submitting lead:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to submit lead' }),
+      body: JSON.stringify({ error: "Failed to submit lead", details: error.message }),
     };
   }
 };
