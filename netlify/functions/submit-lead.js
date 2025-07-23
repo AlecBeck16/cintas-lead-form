@@ -1,19 +1,11 @@
-const { google } = require('googleapis');
-const sheets = google.sheets('v4');
 const querystring = require('querystring');
+const { google } = require('googleapis');
 
 exports.handler = async (event) => {
-  console.log('Received event.body:', event.body);
-
   try {
-    if (!event.body) {
-      throw new Error('No body received in request');
-    }
-
-    // Parse URL-encoded form data
+    console.log("GOOGLE_SERVICE_ACCOUNT_CREDENTIALS env:", process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS);
+    
     const data = querystring.parse(event.body);
-
-    console.log('Parsed data:', data);
 
     const {
       partnerName,
@@ -35,8 +27,10 @@ exports.handler = async (event) => {
 
     const authClient = await auth.getClient();
 
+    const sheets = google.sheets('v4');
+
     const spreadsheetId = process.env.SPREADSHEET_ID;
-    const range = 'Leads!A:J';
+    const range = 'Leads!A:J'; // 10 columns
     const values = [[
       partnerName,
       partnerDivision,
@@ -63,11 +57,10 @@ exports.handler = async (event) => {
       body: JSON.stringify({ message: 'Lead submitted successfully' }),
     };
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error(error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to submit lead', details: error.message }),
+      body: JSON.stringify({ error: 'Failed to submit lead' }),
     };
   }
 };
-
