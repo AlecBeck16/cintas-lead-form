@@ -1,8 +1,12 @@
 const { google } = require('googleapis');
 const sheets = google.sheets('v4');
+const querystring = require('querystring');
 
 exports.handler = async (event) => {
   try {
+    // Parse URL-encoded form data instead of JSON
+    const data = querystring.parse(event.body);
+
     const {
       partnerName,
       partnerDivision,
@@ -14,7 +18,7 @@ exports.handler = async (event) => {
       decisionMakerPhone,
       date,
       notes,
-    } = JSON.parse(event.body);
+    } = data;
 
     const auth = new google.auth.GoogleAuth({
       credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS),
