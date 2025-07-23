@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cintas Lead Form</title>
+</head>
+<body>
+  <h1>Submit a Lead</h1>
+
+  <form 
+    name="lead-form" 
+    method="POST" 
+    data-netlify="true" 
+    netlify-honeypot="bot-field" 
+    action="/.netlify/functions/submit-lead"
+  >
+    <input type="hidden" name="form-name" value="lead-form" />
+    
+    <p hidden>
+      <label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
+    </p>
+
+    <p>
+      Partner Name: <input type="text" name="partnerName" required />
+    </p>
+    <p>
+      Partner Division: <input type="text" name="partnerDivision" required />
+    </p>
+    <p>
+      Division/Product Interested In: <input type="text" name="divisionProduct" required />
+    </p>
+    <p>
+      Company Name: <input type="text" name="companyName" required />
+    </p>
+    <p>
+      Decision Maker Name: <input type="text" name="decisionMaker" required />
+    </p>
+    <p>
+      Address: <input type="text" name="address" required />
+    </p>
+    <p>
+      Email of Decision Maker: <input type="email" name="decisionMakerEmail" required />
+    </p>
+    <p>
+      Phone # of Decision Maker: <input type="tel" name="decisionMakerPhone" required />
+    </p>
+    <p>
+      Date: <input type="date" name="date" required />
+    </p>
+    <p>
+      Notes: <textarea name="notes"></textarea>
+    </p>
+    <p>
+      <button type="submit">Submit Lead</button>
+    </p>
+  </form>
+</body>
+</html>
+
+
